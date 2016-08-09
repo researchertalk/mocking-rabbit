@@ -14,5 +14,9 @@ export default class Channel {
   static async consume(queue) {
     // eslint-disable-next-line no-unused-vars
     const content = new Buffer('');
+
+    return {
+      content,
+    };
   }
 }
