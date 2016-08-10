@@ -4,6 +4,11 @@ const chai = require('chai');
 const amqplib = require('./../lib/amqplib').default;
 const connection = require('./../lib/connection').default;
 const channel = require('./../lib/channel').default;
+const hook = require('./../lib/hook').default;
+
+const Tracker = hook.Tracker;
+const Consumer = hook.Consumer;
+const tracker = hook.tracker;
 
 const assert = chai.assert;
 
@@ -87,6 +92,13 @@ describe('channel', function channelTestCase() {
     });
 
     it('should resolved with object', function assertion(done) {
+      tracker.install();
+      tracker.on('consume', function consuming(consume, step) {
+        assert.equal(consume.queue, 'aQueue');
+        assert.equal(step, 1);
+        consume.response({ content: 'buffer' });
+      });
+
       channel
         .consume('aQueue')
         .then(function consumed(result) {
@@ -94,9 +106,10 @@ describe('channel', function channelTestCase() {
           done();
         })
         .catch(done);
+      tracker.uninstall();
     });
 
-    it('should resolved with object containing content property',
+    it.skip('should resolved with object containing content property',
       function assertion(done) {
         channel
           .consume('aQueue')
@@ -106,5 +119,150 @@ describe('channel', function channelTestCase() {
           })
           .catch(done);
       });
+  });
+});
+
+describe('hook', function hookTestCase() {
+  describe('Tracker', function TrackerTestCase() {
+    it('can be intantiated', function assertion(done) {
+      const hookTracker = new Tracker();
+      assert.instanceOf(hookTracker, Tracker);
+      done();
+    });
+
+    it('must have tracking status false as initial value',
+      function assertion(done) {
+        const hookTracker = new Tracker();
+        assert.isFalse(hookTracker.tracking);
+        done();
+      });
+
+    it('must have consumers instance as initial value',
+      function assertion(done) {
+        const hookTracker = new Tracker();
+        assert.instanceOf(hookTracker.consumer, Consumer);
+        done();
+      });
+
+    it('install() should change tracking status into true',
+      function assertion(done) {
+        const hookTracker = new Tracker();
+        hookTracker.install();
+        assert.isTrue(hookTracker.tracking);
+        done();
+      });
+
+    it('install() should empty consumers list', function assertion(done) {
+      const hookTracker = new Tracker();
+      hookTracker.install();
+      assert.lengthOf(hookTracker.consumer.consumers, 0);
+      done();
+    });
+
+    it('uninstall() should change tracking status to false',
+      function assertion(done) {
+        const hookTracker = new Tracker();
+        hookTracker.install();
+        hookTracker.uninstall();
+        assert.isFalse(hookTracker.tracking);
+        done();
+      });
+
+    it('uninstall() should empty consumers list', function assertion(done) {
+      const hookTracker = new Tracker();
+      hookTracker.install();
+      hookTracker.uninstall();
+      assert.lengthOf(hookTracker.consumer.consumers, 0);
+      done();
+    });
+
+    it.skip('uninstall() should remove all "consume" listeners',
+      function assertion(done) {
+        done();
+      });
+  });
+
+  describe('Consumer', function ConsumerTestCase() {
+    it('can be instantiated', function assertion(done) {
+      const hookConsumer = new Consumer(new Tracker());
+      assert.instanceOf(hookConsumer, Consumer);
+      done();
+    });
+
+    it('must have tracker instance as initial value', function assertion(done) {
+      const hookConsumer = new Consumer(new Tracker());
+      assert.instanceOf(hookConsumer.tracker, Tracker);
+      done();
+    });
+
+    it('must have empty consumers list as initial value',
+      function assertion(done) {
+        const hookConsumer = new Consumer(new Tracker());
+        assert.lengthOf(hookConsumer.consumers, 0);
+        done();
+      });
+
+    it('reset() should empty consumers list',
+      function assertion(done) {
+        const hookConsumer = new Consumer(new Tracker());
+        hookConsumer.consumers.push('imaginary');
+        hookConsumer.reset();
+        assert.lengthOf(hookConsumer.consumers, 0);
+        done();
+      });
+
+    it('first() should give first member of consumers list',
+      function assertion(done) {
+        const hookConsumer = new Consumer(new Tracker());
+        hookConsumer.consumers.push('imaginary1');
+        hookConsumer.consumers.push('imaginary2');
+        const firstMember = hookConsumer.first();
+        assert.equal(firstMember, 'imaginary1');
+        done();
+      });
+
+    it('last() should give last member of consumers list',
+      function assertion(done) {
+        const hookConsumer = new Consumer(new Tracker());
+        hookConsumer.consumers.push('imaginary1');
+        hookConsumer.consumers.push('imaginary2');
+        const lastMember = hookConsumer.last();
+        assert.equal(lastMember, 'imaginary2');
+        done();
+      });
+
+    it('count() should give count member of consumers list',
+      function assertion(done) {
+        const hookConsumer = new Consumer(new Tracker());
+        hookConsumer.consumers.push('imaginary1');
+        hookConsumer.consumers.push('imaginary2');
+        const countMember = hookConsumer.count();
+        assert.equal(countMember, 2);
+        done();
+      });
+
+    it('at() should give a member at certain index. Index will start from 1',
+      function assertion(done) {
+        const hookConsumer = new Consumer(new Tracker());
+        hookConsumer.consumers.push('imaginary1');
+        hookConsumer.consumers.push('imaginary2');
+        const member = hookConsumer.at(1);
+        assert.equal(member, 'imaginary1');
+        done();
+      });
+
+    it('track() should be track emitter', function assertion(done) {
+      const hookTracker = new Tracker();
+      hookTracker.install();
+      const hookConsumer = new Consumer(hookTracker);
+      hookTracker.on('consume', function consuming(consume, step) {
+        consume.response('response');
+        assert.equal(step, 1);
+      });
+      hookConsumer.track({ queue: 'test.response' }, function tracking(result) {
+        assert.equal(result, 'response');
+        done();
+      });
+    });
   });
 });
