@@ -16,7 +16,7 @@
     "coveralls": "cat ./test/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "dev": "babel -w -D src/ --out-dir lib/ --source-maps inline",
     "lint": "eslint src/**",
-    "prepublish": "npm run babel",
+    "postinstall": "npm run babel",
     "test": "npm run lint && npm run babel && istanbul --config=test/.istanbul.yml cover node_modules/mocha/bin/_mocha -- --check-leaks -b -R spec test/index.js"
   },
   "dependencies": {
