@@ -1,5 +1,7 @@
 
-import { tracker } from './hook';
+import hook from './hook';
+
+const tracker = hook.tracker;
 
 export default class Channel {
   // eslint-disable-next-line no-unused-vars
@@ -14,7 +16,8 @@ export default class Channel {
 
   // eslint-disable-next-line no-unused-vars
   static async consume(queue) {
-    const message = await tracker.consumers.track({ queue });
-    return message;
+    return new Promise((resolve) => {
+      tracker.consumer.track({ queue }, resolve);
+    });
   }
 }

@@ -13,8 +13,10 @@
   "main": "index.js",
   "scripts": {
     "babel": "babel -D src/ --out-dir lib/ --source-maps inline",
+    "coveralls": "cat ./test/coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "dev": "babel -w -D src/ --out-dir lib/ --source-maps inline",
     "lint": "eslint src/**",
+    "prepublish": "npm run babel",
     "test": "npm run lint && npm run babel && istanbul --config=test/.istanbul.yml cover node_modules/mocha/bin/_mocha -- --check-leaks -b -R spec test/index.js"
   },
   "dependencies": {
@@ -31,6 +33,7 @@
     "babel-preset-es2015": "^6.13.2",
     "babel-preset-stage-3": "^6.11.0",
     "chai": "^3.5.0",
+    "coveralls": "^2.11.12",
     "eslint": "^3.2.2",
     "eslint-config-airbnb-base": "^5.0.1",
     "eslint-plugin-babel": "^3.3.0",

@@ -12,12 +12,20 @@ class Consumer {
     this.consumers = [];
   }
 
-  track(consumer) {
+  track(consumer, resolve) {
     let step;
 
     if (this.tracker.tracking) {
       // eslint-disable-next-line no-param-reassign
-      consumer.response = async (result) => result;
+      consumer.response = function response(result) {
+        // eslint-disable-next-line no-param-reassign
+        consumer.result = result;
+        resolve(result);
+      };
+
+      // eslint-disable-next-line no-param-reassign
+      delete consumer.result;
+
       step = this.consumers.push(consumer);
       this.tracker.emit('consume', consumer, step);
     }

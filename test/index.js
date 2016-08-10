@@ -86,12 +86,19 @@ describe('channel', function channelTestCase() {
   });
 
   describe('consume', function consumeTestCase() {
-    it.skip('should be a promise', function assertion(done) {
+    it('should be a promise', function assertion(done) {
       assert.isFunction(channel.consume().then);
       done();
     });
 
-    it.skip('should resolved with object', function assertion(done) {
+    it('should resolved with object', function assertion(done) {
+      tracker.install();
+      tracker.on('consume', function consuming(consume, step) {
+        assert.equal(consume.queue, 'aQueue');
+        assert.equal(step, 1);
+        consume.response({ content: 'buffer' });
+      });
+
       channel
         .consume('aQueue')
         .then(function consumed(result) {
@@ -99,6 +106,7 @@ describe('channel', function channelTestCase() {
           done();
         })
         .catch(done);
+      tracker.uninstall();
     });
 
     it.skip('should resolved with object containing content property',
@@ -243,8 +251,18 @@ describe('hook', function hookTestCase() {
         done();
       });
 
-    it.skip('track() should be track emitter', function assertion(done) {
-      done();
+    it('track() should be track emitter', function assertion(done) {
+      const hookTracker = new Tracker();
+      hookTracker.install();
+      const hookConsumer = new Consumer(hookTracker);
+      hookTracker.on('consume', function consuming(consume, step) {
+        consume.response('response');
+        assert.equal(step, 1);
+      });
+      hookConsumer.track({ queue: 'test.response' }, function tracking(result) {
+        assert.equal(result, 'response');
+        done();
+      });
     });
   });
 });
