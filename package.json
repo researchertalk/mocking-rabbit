@@ -43,5 +43,9 @@
     "mocha": "^2.5.3",
     "source-map-support": "^0.4.2"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.com:researcher/mocking-rabbit.git"
+  },
   "license": "GPL-3.0"
 }

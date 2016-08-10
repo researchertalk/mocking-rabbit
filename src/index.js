@@ -1,6 +1,6 @@
 
 import Amqplib from './amqplib';
-import Connection from './connection'
+import Connection from './connection';
 import Channel from './channel';
 import hook from './hook';
 
