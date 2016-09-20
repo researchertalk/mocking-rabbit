@@ -51,6 +51,22 @@ describe('connection', function connectionTestCase() {
 });
 
 describe('channel', function channelTestCase() {
+  describe('assertExchange', function assertExchangeTestCase() {
+    it('should be a promise', function assertion(done) {
+      assert.isFunction(channel.assertExchange().then);
+      done();
+    });
+
+    it('should resolved with true', function assertion(done) {
+      channel.assertExchange('XE', 'direct')
+        .then(function asserted(result) {
+          assert.isTrue(result);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
   describe('assertQueue', function assertQueueTestCase() {
     it('should be a promise', function assertion(done) {
       assert.isFunction(channel.assertQueue().then);
@@ -60,6 +76,38 @@ describe('channel', function channelTestCase() {
     it('should resolved with true', function assertion(done) {
       channel
         .assertQueue('aQueue')
+        .then(function asserted(result) {
+          assert.isTrue(result);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('bindQueue', function bindQueueTestCase() {
+    it('should be a promise', function assertion(done) {
+      assert.isFunction(channel.bindQueue().then);
+      done();
+    });
+
+    it('should resolved with true', function assertion(done) {
+      channel.bindQueue('source', 'dest', 'key')
+        .then(function asserted(result) {
+          assert.isTrue(result);
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('publish', function publishTestCase() {
+    it('should be a promise', function assertion(done) {
+      assert.isFunction(channel.publish().then);
+      done();
+    });
+
+    it('should resolved with true', function assertion(done) {
+      channel.publish('exchange', 'key', 'content')
         .then(function asserted(result) {
           assert.isTrue(result);
           done();
