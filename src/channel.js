@@ -35,4 +35,8 @@ export default class Channel {
       tracker.consumer.track({ queue }, resolve);
     });
   }
+
+  static async close() {
+    return true;
+  }
 }
